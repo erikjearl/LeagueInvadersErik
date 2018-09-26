@@ -18,6 +18,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 	Font titleFont;
 	Font smallFont;
 	Rocketship rocket = new Rocketship(250,700,50,50);
+	ObjectManager objMan;
+	
 	
 	boolean up;
 	boolean down;
@@ -25,9 +27,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 	boolean right;
 	
 	public GamePanel() {
+	objMan = new ObjectManager(rocket);
 	timer = new Timer(1000/60, this);
 	titleFont = new Font("Arial",Font.BOLD,48);
 	smallFont = new Font("Arial",Font.PLAIN,27);
+	
+	 
 	}
 	
 	void startGame() {
@@ -38,7 +43,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		
 	}
 	void updateGameState(){
-		rocket.update();
+		objMan.update();
+		objMan.manageEnemies();
+		
+		
+		if(!rocket.isAlive) {
+			currentState = END_STATE;
+		}
+		
 	}
 	void updateEndState() {
 		
@@ -58,7 +70,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, LeagueInvaders.width, LeagueInvaders.height);  
 		
-		rocket.draw(g);
+		objMan.draw(g);
+		objMan.checkCollision();
+		objMan.purgeObjects();
 	}
 	void drawEndState(Graphics g) {
 		g.setColor(Color.RED);
@@ -68,7 +82,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 		g.setColor(Color.BLACK);
 		g.drawString("GAMEOVER", 100, 200);
 		g.setFont(smallFont);
-		g.drawString("You killed 0 enemies", 115, 375);
+		g.drawString("You killed " + objMan.getScore() + " enemies", 115, 375);
 		g.drawString("Press ENTER to restart", 100, 500);
 	
 	}
@@ -150,12 +164,27 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener{
 			right=true;
 		}
 		
+		if(e.getKeyCode() == KeyEvent.VK_SPACE ) {
+			objMan.addProjectile(new Projectile((22 + rocket.x),(rocket.y),10,10));
+		}
+		
 		if(e.getKeyCode() == KeyEvent.VK_ENTER ) {
+			
+			
+			if(currentState == END_STATE) {
+				 rocket = new Rocketship(250,700,50,50);
+				 objMan = new ObjectManager(rocket);
+			}
 			currentState++;
+			
+			
 			if(currentState > END_STATE){
                 currentState = MENU_STATE;
 			}
+			
+			 
 		}
+		
 	}
 
 	@Override

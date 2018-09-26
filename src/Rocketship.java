@@ -11,7 +11,7 @@ int speed;
 	}
 	
 	void update() {
-
+		  super.update();
     }
     
     void draw(Graphics g) {
